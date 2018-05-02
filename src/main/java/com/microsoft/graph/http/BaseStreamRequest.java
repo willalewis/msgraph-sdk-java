@@ -96,13 +96,41 @@ public abstract class BaseStreamRequest<T> implements IHttpStreamRequest {
     /**
      * Sends this request
      *
-     * @param fileContents the file to upload
-     * @return             the stream that the caller needs to close
+     * @param fileContents the content of the file to upload
+     * @return             the result from the request
      */
     @SuppressWarnings("unchecked")
     protected T send(final byte[] fileContents) {
         baseRequest.setHttpMethod(HttpMethod.PUT);
         return (T) baseRequest.getClient().getHttpProvider().send(this, baseRequest.getResponseType(), fileContents);
+    }
+
+    /**
+     * Sends this request
+     *
+     * @param contentStream a stream to supply the contents of the file to upload
+     * @param contentLength the length of the content supplied by the stream
+     * @param callback      the callback to be called when the request completes
+     */
+    @SuppressWarnings("unchecked")
+    protected void send(final InputStream contentStream, int contentLength, final ICallback<T> callback) {
+        baseRequest.setHttpMethod(HttpMethod.PUT);
+        baseRequest.getClient().getHttpProvider().send(this, callback, (Class<T>) baseRequest.getResponseType(),
+                new InputStreamBody(contentStream,contentLength));
+    }
+
+    /**
+     * Sends this request
+     *
+     * @param contentStream a stream to supply the contents of the file to upload
+     * @param contentLength the length of the content supplied by the stream
+     * @return              the result from the request
+     */
+    @SuppressWarnings("unchecked")
+    protected T send(final InputStream contentStream, int contentLength) {
+        baseRequest.setHttpMethod(HttpMethod.PUT);
+        return (T) baseRequest.getClient().getHttpProvider().send(this, baseRequest.getResponseType(),
+                new InputStreamBody(contentStream,contentLength));
     }
 
     /**

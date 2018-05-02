@@ -1,0 +1,6 @@
+mvn3 install:install-file -Dfile=./build/libs/msgraph-sdk-java.jar -DpomFile=./pom.xml -DgroupId=com.microsoft -DartifactId=msgraph-sdk-java -Dversion=0.1-SNAPSHOT -Dpackaging=jar
+
+
+mvn3 install:install-file -Dfile=./build/libs/msgraph-sdk-java.jar -DpomFile=./pom.xml -Dpackaging=jar
+
+

@@ -107,7 +107,7 @@ public class GraphServiceException extends ClientException {
     /**
      * The response headers
      */
-    private final List<String> responseHeaders;
+    private final Map<String,List<String>> responseHeaders;
     
     /**
      * Whether to log the full error response
@@ -133,7 +133,7 @@ public class GraphServiceException extends ClientException {
                                     final String requestBody,
                                     final int responseCode,
                                     final String responseMessage,
-                                    final List<String> responseHeaders,
+                                    final Map<String,List<String>> responseHeaders,
                                     final GraphErrorResponse error,
                                     final boolean verbose) {
         super(responseMessage, null);
@@ -151,6 +151,30 @@ public class GraphServiceException extends ClientException {
     @Override
     public String getMessage() {
         return getMessage(verbose);
+    }
+
+    public int getResponseCode() {
+        return responseCode;
+    }
+
+    public GraphErrorResponse getError() {
+        return error;
+    }
+
+    public Map<String,List<String>> getResponseHeaders() {
+        return responseHeaders;
+    }
+
+    public List<String> getResponseHeaders(String key) {
+        return responseHeaders.get(key);
+    }
+
+    public String getFirstResponseHeader(String key) {
+        List<String> headers = responseHeaders.get(key);
+        if(headers != null && headers.size() > 0) {
+            return headers.get(0);
+        }
+        return null;
     }
 
     /**
@@ -196,12 +220,17 @@ public class GraphServiceException extends ClientException {
 
         // Response information
         sb.append(responseCode).append(" : ").append(responseMessage).append(NEW_LINE);
-        for (final String header : responseHeaders) {
+        for (final String headerKey : responseHeaders.keySet()) {
             if (verbose) {
-                sb.append(header).append(NEW_LINE);
+                for(String value : responseHeaders.get(headerKey)) {
+                    sb.append(headerKey).append(" : ").append(value).append(NEW_LINE);
+                }
+
             } else {
-                if (header.toLowerCase(Locale.ROOT).startsWith("x-throwsite")) {
-                    sb.append(header).append(NEW_LINE);
+                if (headerKey.toLowerCase(Locale.ROOT).startsWith("x-throwsite")) {
+                    for(String value : responseHeaders.get(headerKey)) {
+                        sb.append(headerKey).append(" : ").append(value).append(NEW_LINE);
+                    }
                 }
             }
         }
@@ -280,17 +309,7 @@ public class GraphServiceException extends ClientException {
         }
 
         final int responseCode = connection.getResponseCode();
-        final List<String> responseHeaders = new LinkedList<>();
-        final Map<String, String> headers = connection.getHeaders();
-        for (final String key : headers.keySet()) {
-            final String fieldPrefix;
-            if (key == null) {
-                fieldPrefix = "";
-            } else {
-                fieldPrefix = key + " : ";
-            }
-            responseHeaders.add(fieldPrefix + headers.get(key));
-        }
+        final Map<String, List<String>> responseHeaders = connection.getResponseHeaders();
 
         final String responseMessage = connection.getResponseMessage();
         final String rawOutput = DefaultHttpProvider.streamToString(connection.getInputStream());

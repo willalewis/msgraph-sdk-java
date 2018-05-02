@@ -23,6 +23,7 @@
 package com.microsoft.graph.http;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * An unexpected exception from the Graph service
@@ -50,7 +51,7 @@ public class GraphFatalServiceException extends GraphServiceException {
                                          final String requestBody,
                                          final int responseCode,
                                          final String responseMessage,
-                                         final List<String> responseHeaders,
+                                         final Map<String,List<String>> responseHeaders,
                                          final GraphErrorResponse error,
                                          final boolean verbose) {
         super(method, url, requestHeaders, requestBody, responseCode, responseMessage, responseHeaders, error, verbose);

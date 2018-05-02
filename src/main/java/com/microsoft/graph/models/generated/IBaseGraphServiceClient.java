@@ -6,6 +6,7 @@ package com.microsoft.graph.models.generated;
 
 import com.microsoft.graph.concurrency.*;
 import com.microsoft.graph.core.*;
+import com.microsoft.graph.logger.LoggerLevel;
 import com.microsoft.graph.models.extensions.*;
 import com.microsoft.graph.models.generated.*;
 import com.microsoft.graph.http.*;
@@ -23,6 +24,12 @@ import java.util.EnumSet;
  * The interface for the Base Graph Service Client.
  */
 public interface IBaseGraphServiceClient extends IBaseClient {
+
+    /**
+     * Sets the log level for this client
+     * @param level the desired log level
+     */
+    void setLoggingLevel(LoggerLevel level);
 
     /**
      * Gets the collection of DirectoryObjects objects

@@ -6,6 +6,7 @@ package com.microsoft.graph.requests.generated;
 
 import com.microsoft.graph.concurrency.*;
 import com.microsoft.graph.core.*;
+import com.microsoft.graph.logger.LoggerLevel;
 import com.microsoft.graph.models.extensions.*;
 import com.microsoft.graph.models.generated.*;
 import com.microsoft.graph.http.*;
@@ -33,6 +34,11 @@ public class BaseGraphServiceClient extends BaseClient implements IBaseGraphServ
      * The current endpoint
      */
     private String endpoint;
+
+    @Override
+    public void setLoggingLevel(LoggerLevel level) {
+        getLogger().setLoggingLevel(level);
+    }
 
     @Override
     public String getServiceRoot() {

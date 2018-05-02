@@ -231,56 +231,73 @@ public class DefaultHttpProvider implements IHttpProvider {
                 logger.logDebug("Request Method " + request.getHttpMethod().toString());
                 List<HeaderOption> requestHeaders = request.getHeaders();
 
-                final byte[] bytesToWrite;
+                final InputStream streamToWrite;
+                final int contentLength;
+
                 connection.addRequestHeader("Accept", "*/*");
                 if (serializable == null) {
                 	// Send an empty body through with a POST request
                 	// This ensures that the Content-Length header is properly set
                 	if (request.getHttpMethod() == HttpMethod.POST) {
-                		bytesToWrite = new byte[0];
+                        streamToWrite = new ByteArrayInputStream(new byte[0]);
                 	}
                 	else {
-                		bytesToWrite = null;
+                        streamToWrite = null;
                 	}
+                    contentLength = 0;
                 } else if (serializable instanceof byte[]) {
                     logger.logDebug("Sending byte[] as request body");
-                    bytesToWrite = (byte[]) serializable;
+                    byte[] bytesToWrite = (byte[]) serializable;
+                    streamToWrite = new ByteArrayInputStream(bytesToWrite);
 
                     // If the user hasn't specified a Content-Type for the request
                     if (!hasHeader(requestHeaders, CONTENT_TYPE_HEADER_NAME)) {
                         connection.addRequestHeader(CONTENT_TYPE_HEADER_NAME, binaryContentType);
                     }
-                    connection.setContentLength(bytesToWrite.length);
-                } else {
+                    contentLength = bytesToWrite.length;
+                }
+                else if (serializable instanceof InputStreamBody) {
+                    InputStreamBody inputStreamBody = (InputStreamBody)serializable;
+                    streamToWrite = inputStreamBody.getInputStream();
+                    contentLength = inputStreamBody.getContentLength();
+                }
+                else {
                     logger.logDebug("Sending " + serializable.getClass().getName() + " as request body");
                     final String serializeObject = serializer.serializeObject(serializable);
-                    bytesToWrite = serializeObject.getBytes();
+                    byte[] bytesToWrite = serializeObject.getBytes();
+                    streamToWrite = new ByteArrayInputStream(bytesToWrite);
 
                     // If the user hasn't specified a Content-Type for the request
                     if (!hasHeader(requestHeaders, CONTENT_TYPE_HEADER_NAME)) {
                         connection.addRequestHeader(CONTENT_TYPE_HEADER_NAME, JSON_CONTENT_TYPE);
                     }
-                    connection.setContentLength(bytesToWrite.length);
+                    contentLength = bytesToWrite.length;
                 }
 
                 // Handle cases where we've got a body to process.
-                if (bytesToWrite != null) {
+                if (streamToWrite != null) {
+
+                    connection.setContentLength(contentLength);
                     out = connection.getOutputStream();
 
                     int writtenSoFar = 0;
-                    BufferedOutputStream bos = new BufferedOutputStream(out);
+                    byte[] buffer = new byte[defaultBufferSize];
 
-                    int toWrite;
-                    do {
-                        toWrite = Math.min(defaultBufferSize, bytesToWrite.length - writtenSoFar);
-                        bos.write(bytesToWrite, writtenSoFar, toWrite);
-                        writtenSoFar = writtenSoFar + toWrite;
-                        if (progress != null) {
-                            executors.performOnForeground(writtenSoFar, bytesToWrite.length,
-                                    progress);
+                    try(BufferedOutputStream bos = new BufferedOutputStream(out)) {
+
+                        int bytesRead = streamToWrite.read(buffer);
+                        while(bytesRead != -1) {
+                            bos.write(buffer, 0, bytesRead);
+                            writtenSoFar = writtenSoFar + bytesRead;
+
+                            if (progress != null) {
+                                executors.performOnForeground(writtenSoFar, contentLength,
+                                        progress);
+                            }
+
+                            bytesRead = streamToWrite.read(buffer);
                         }
-                    } while (toWrite > 0);
-                    bos.close();
+                    }
                 }
 
                 if (handler != null) {
