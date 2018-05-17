@@ -24,10 +24,12 @@ package com.microsoft.graph.serializer;
 
 import com.google.gson.JsonObject;
 
+import java.io.Serializable;
+
 /**
  * An object that was parsed from JSON
  */
-public interface IJsonBackedObject {
+public interface IJsonBackedObject extends Serializable {
 
     /**
      * Sets the raw JSON object this object was parsed from
