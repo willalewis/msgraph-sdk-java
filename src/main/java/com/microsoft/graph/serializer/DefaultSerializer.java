@@ -250,8 +250,8 @@ public class DefaultSerializer implements ISerializer {
         		return null;
         	}
         }
-        //If there is no defined OData type, return null
-        return null;
+        //If there is no defined OData type, use the parent class
+        return parentClass;
     }
 
     @VisibleForTesting

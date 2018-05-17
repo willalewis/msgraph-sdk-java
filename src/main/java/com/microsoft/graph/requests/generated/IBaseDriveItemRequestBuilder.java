@@ -71,6 +71,8 @@ public interface IBaseDriveItemRequestBuilder extends IRequestBuilder {
 
     IDriveItemInviteCollectionRequestBuilder invite(final Boolean requireSignIn, final java.util.List<String> roles, final Boolean sendInvitation, final String message, final java.util.List<DriveRecipient> recipients);
 
+    IDriveItemDeltaCollectionRequestBuilder deltaToken(final String token);
+
     IDriveItemDeltaCollectionRequestBuilder delta(final String token);
 
     IDriveItemDeltaCollectionRequestBuilder delta();

@@ -22,6 +22,7 @@
 
 package com.microsoft.graph.http;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import com.microsoft.graph.core.GraphErrorCodes;
@@ -29,12 +30,15 @@ import com.microsoft.graph.core.GraphErrorCodes;
 public class GraphError {
 
     @SerializedName("message")
+    @Expose
     public String message;
 
     @SerializedName("code")
+    @Expose
     public String code;
 
-    @SerializedName("innererror")
+    @SerializedName(value="innererror", alternate = {"innerError", "InnerError"})
+    @Expose
     public GraphInnerError innererror;
 
     /**

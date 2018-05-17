@@ -114,8 +114,12 @@ public class BaseDriveItemRequestBuilder extends BaseRequestBuilder implements I
         return new DriveItemInviteCollectionRequestBuilder(getRequestUrlWithAdditionalSegment("microsoft.graph.invite"), getClient(), null, requireSignIn, roles, sendInvitation, message, recipients);
     }
 
-    public IDriveItemDeltaCollectionRequestBuilder delta(final String token) {
+    public IDriveItemDeltaCollectionRequestBuilder deltaToken(final String token) {
         return new DriveItemDeltaCollectionRequestBuilder(getRequestUrlWithAdditionalSegment("microsoft.graph.delta"), getClient(), null, token);
+    }
+
+    public IDriveItemDeltaCollectionRequestBuilder delta(final String deltaLink) {
+        return new DriveItemDeltaCollectionRequestBuilder(deltaLink, getClient(), null);
     }
 
     public IDriveItemDeltaCollectionRequestBuilder delta() {
